@@ -68,8 +68,9 @@ class UserContrller{
                 isValid = false;
             }
 
-            if(field.name == 'gender' && field.checked) {
-                user[field.name] = field.value;
+            if(field.name == 'gender') {
+                if(field.checked)
+                    user[field.name] = field.value;
             } else if(field.name == 'admin'){
                 user[field.name] = field.checked;
             } else {
@@ -80,10 +81,9 @@ class UserContrller{
         if (!isValid) {
             return false;
         }
-
         return new User(user.name,
                             user.gender, 
-                            user.birth, 
+                            user.dateBirth, 
                             user.country, 
                             user.email, 
                             user.password, 
@@ -103,11 +103,43 @@ class UserContrller{
             <td>${(dataUser.admin)?'Sim':'Não'}</td>
             <td>${Utils.dateFormat(dataUser.register)}</td>
             <td>
-                <button type="button" class="btn btn-primary btn-xs btn-flat">Editar</button>
+                <button type="button" class="btn-edit btn btn-primary btn-xs btn-flat">Editar</button>
                 <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
             </td>
            
         `;
+
+        tr.querySelector(".btn-edit").addEventListener("click", e=>{
+
+            let json = JSON.parse(tr.dataset.user);
+            let form = document.querySelector("#form-user-update");
+
+            for(let name in json) {
+                let field = form.querySelector("[name="+name.replace("_", "")+"]");
+
+                if (field) {
+                    switch(field.type) {
+                        case 'file':
+                            continue;
+                        break;
+                        case 'radio':
+                            field = form.querySelector("[name="+name.replace("_", "")+"][value="+json[name]+"]");
+                            field.checked = true;
+                        break;
+                        case 'checkbox':
+                            field.checked = json[name];
+                        break;
+                        default:
+                            console.log(field.value +"  "+json[name]);
+                            field.value = json[name];
+                    }
+                }
+            }
+            document.querySelector("#box-user-create").style.display = "none";
+            document.querySelector("#box-user-update").style.display = "block";
+
+        });
+        
         this.tableEl.appendChild(tr);
         this.updateCount();
     }
