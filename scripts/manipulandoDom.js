@@ -16,6 +16,10 @@ pass.value = '123456';*/
 let userConstroller = new UserContrller("form-user-create", "table-users");
 userConstroller.onSubmit();
 
+function onClosed() {
+    userConstroller.onClosed();
+}
+
 
 
 

@@ -28,6 +28,12 @@ class UserContrller{
         });
     }
 
+    onClosed() {
+        document.querySelector("#box-user-create").style.display = "block";
+        document.querySelector("#box-user-update").style.display = "none";
+        this.formEl.reset();
+    }
+
     getPhoto(){
         return new Promise ((resolve, reject)=>{
             let fileReader = new FileReader();
@@ -130,7 +136,6 @@ class UserContrller{
                             field.checked = json[name];
                         break;
                         default:
-                            console.log(field.value +"  "+json[name]);
                             field.value = json[name];
                     }
                 }
