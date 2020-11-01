@@ -17,7 +17,7 @@ class UserContrller{
                 return false;
             }
 
-            this.getPhoto().then(
+            this.getPhoto(this.formEl).then(
                 (content)=>{
                     values.photo = content;     
                     this.addLine(values);
@@ -31,33 +31,49 @@ class UserContrller{
     }
 
     onEdit(){
-        console.log('Teste');
         this.formUpdate.addEventListener("submit", (event)=>{
             let btn = this.formUpdate.querySelector("[type=submit]");
             event.preventDefault();
             btn.disabled = true;
             let values = this.getValue(this.formUpdate);
-
-            console.log(values);  
+ 
             let index = this.formUpdate.dataset.trIndex;
-            let tr = this.tableEl.rows[index]; 
-            tr.dataset.user = JSON.stringify(values);
-            tr.innerHTML= `
+            let tr = this.tableEl.rows[index];
+            let userOld =  JSON.parse(tr.dataset.user);
+            let result = Object.assign({}, userOld, values);
             
-                <td><img src="${values.photo}" alt="User Image" class="img-circle img-sm"></td>
-                <td>${values.name}</td>
-                <td>${values.email}</td>
-                <td>${(values.admin)?'Sim':'Não'}</td>
-                <td>${Utils.dateFormat(values.register)}</td>
-                <td>
-                    <button type="button" class="btn-edit btn btn-primary btn-xs btn-flat">Editar</button>
-                    <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
-                </td>
-            
-            `;
-            this.addEventsTR(tr);
-            this.updateCount();
+            this.getPhoto(this.formUpdate).then(
+                (content)=>{
+                    if(!values.photo){
+                        result._photo = userOld._photo;
+                    } else {
+                        result._photo = content;
+                    }
 
+                    tr.dataset.user = JSON.stringify(result);
+
+                    tr.innerHTML= `
+            
+                        <td><img src="${result._photo}" alt="User Image" class="img-circle img-sm"></td>
+                        <td>${result._name}</td>
+                        <td>${result._email}</td>
+                        <td>${(result._admin)?'Sim':'Não'}</td>
+                        <td>${Utils.dateFormat(result._register)}</td>
+                        <td>
+                            <button type="button" class="btn-edit btn btn-primary btn-xs btn-flat">Editar</button>
+                            <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
+                        </td>
+                    
+                    `;     
+                    this.addEventsTR(tr);
+                    this.updateCount();
+                    this.formUpdate.reset();
+                    btn.disabled = false;
+                    this.onClosed();
+                },
+                (e)=>{
+                    console.error(e);
+            });
         });
     }
 
@@ -68,11 +84,11 @@ class UserContrller{
         this.formUpdate.reset();
     }
 
-    getPhoto(){
+    getPhoto(formEl){
         return new Promise ((resolve, reject)=>{
             let fileReader = new FileReader();
     
-            let element = [...this.formEl.elements].filter(item => {
+            let element = [...formEl.elements].filter(item => {
                 if (item.name === 'photo') {
                     return item;
                 }
@@ -160,12 +176,11 @@ class UserContrller{
         tr.querySelector(".btn-edit").addEventListener("click", e=>{
 
             let json = JSON.parse(tr.dataset.user);
-            let form = document.querySelector("#form-user-update");
-
-            form.dataset.trIndex = tr.sectionRowIndex;
+        
+            this.formUpdate.dataset.trIndex = tr.sectionRowIndex;
 
             for(let name in json) {
-                let field = form.querySelector("[name="+name.replace("_", "")+"]");
+                let field = this.formUpdate.querySelector("[name="+name.replace("_", "")+"]");
 
                 if (field) {
                     switch(field.type) {
@@ -173,7 +188,7 @@ class UserContrller{
                             continue;
                         break;
                         case 'radio':
-                            field = form.querySelector("[name="+name.replace("_", "")+"][value="+json[name]+"]");
+                            field = this.formUpdate.querySelector("[name="+name.replace("_", "")+"][value="+json[name]+"]");
                             field.checked = true;
                         break;
                         case 'checkbox':
@@ -184,6 +199,7 @@ class UserContrller{
                     }
                 }
             }
+            this.formUpdate.querySelector(".photo").src = json._photo;
             document.querySelector("#box-user-create").style.display = "none";
             document.querySelector("#box-user-update").style.display = "block";
 
