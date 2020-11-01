@@ -21,7 +21,7 @@ class UserContrller{
             this.getPhoto(this.formEl).then(
                 (content)=>{
                     values.photo = content;
-                    this.insert(values);     
+                    values.save();  
                     this.addLine(values);
                     this.formEl.reset();
                 },
@@ -54,6 +54,7 @@ class UserContrller{
 
                     let user = new User();
                     user.loadFromJSON(result);
+                    user.save();
                     this.getTr(user, tr);
                         
                     this.updateCount();
@@ -225,29 +226,13 @@ class UserContrller{
         document.querySelector("#number-users-admin").innerHTML = numberAdmin;
     }
 
-    getSessionStorage() {
-        let users = [];
-        if (localStorage.getItem("users")) {
-            users = JSON.parse(localStorage.getItem("users"));
-        }
-
-        return users;
-    }
-
     selectAll() {
-        let users = this.getSessionStorage();
+        let user = new User();
+        let users = user.getSessionStorage();
         users.forEach(dataUser=>{
             let user = new User();
             user.loadFromJSON(dataUser);
             this.addLine(user);
         });
-    }
-
-
-    insert(dataUser) {
-        let users = this.getSessionStorage();
-        users.push(dataUser);
-        //sessionStorage.setItem("users", JSON.stringify(users));
-        localStorage.setItem("users", JSON.stringify(users));
     }
 }
