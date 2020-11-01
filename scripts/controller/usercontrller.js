@@ -52,22 +52,10 @@ class UserContrller{
                         result._photo = content;
                     }
 
-                    tr.dataset.user = JSON.stringify(result);
-
-                    tr.innerHTML= `
-            
-                        <td><img src="${result._photo}" alt="User Image" class="img-circle img-sm"></td>
-                        <td>${result._name}</td>
-                        <td>${result._email}</td>
-                        <td>${(result._admin)?'Sim':'Não'}</td>
-                        <td>${Utils.dateFormat(result._register)}</td>
-                        <td>
-                            <button type="button" class="btn-edit btn btn-primary btn-xs btn-flat">Editar</button>
-                            <button type="button" class="btn-delete btn btn-danger btn-xs btn-flat">Excluir</button>
-                        </td>
-                    
-                    `;     
-                    this.addEventsTR(tr);
+                    let user = new User();
+                    user.loadFromJSON(result);
+                    this.getTr(user, tr);
+                        
                     this.updateCount();
                     this.formUpdate.reset();
                     btn.disabled = false;
@@ -151,10 +139,18 @@ class UserContrller{
     }
 
     addLine(dataUser){
-        
-        let tr = document.createElement('tr');
-         tr.dataset.user = JSON.stringify(dataUser);
-         tr.innerHTML= `
+        let tr = this.getTr(dataUser);
+        this.tableEl.appendChild(tr);
+        this.updateCount();
+    }
+
+    getTr(dataUser, tr = null) {
+
+        if(tr === null) {
+            tr = document.createElement('tr');
+        }
+        tr.dataset.user = JSON.stringify(dataUser);
+        tr.innerHTML= `
             
             <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
             <td>${dataUser.name}</td>
@@ -167,11 +163,8 @@ class UserContrller{
             </td>
            
         `;
-
         this.addEventsTR(tr);
-        
-        this.tableEl.appendChild(tr);
-        this.updateCount();
+        return tr;
     }
 
     addEventsTR(tr) {
