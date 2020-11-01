@@ -13,7 +13,7 @@ parents.value = 'Brasil';
 email.value = 'jaguaryan@gmail.com'
 pass.value = '123456';*/
 
-let userConstroller = new UserContrller("form-user-create", "table-users");
+let userConstroller = new UserContrller("form-user-create","form-user-update", "table-users");
 userConstroller.onSubmit();
 
 function onClosed() {

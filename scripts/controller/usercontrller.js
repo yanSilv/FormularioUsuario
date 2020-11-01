@@ -1,7 +1,9 @@
 class UserContrller{
-    constructor(formId, tableId) {
-        this.formEl = document.getElementById(formId);
+    constructor(formIdCreate,formIdUpdate, tableId) {
+        this.formEl = document.getElementById(formIdCreate);
+        this.formUpdate = document.getElementById(formIdUpdate);
         this.tableEl = document.getElementById(tableId);
+        this.onEdit();
     }
 
     onSubmit(){
@@ -9,7 +11,7 @@ class UserContrller{
             let btn = this.formEl.querySelector("[type=submit]");
             event.preventDefault();
             btn.disabled = true;
-            let values = this.getValue();
+            let values = this.getValue(this.formEl);
             
             if (!values) {
                 return false;
@@ -28,10 +30,42 @@ class UserContrller{
         });
     }
 
+    onEdit(){
+        console.log('Teste');
+        this.formUpdate.addEventListener("submit", (event)=>{
+            let btn = this.formUpdate.querySelector("[type=submit]");
+            event.preventDefault();
+            btn.disabled = true;
+            let values = this.getValue(this.formUpdate);
+
+            console.log(values);  
+            let index = this.formUpdate.dataset.trIndex;
+            let tr = this.tableEl.rows[index]; 
+            tr.dataset.user = JSON.stringify(values);
+            tr.innerHTML= `
+            
+                <td><img src="${values.photo}" alt="User Image" class="img-circle img-sm"></td>
+                <td>${values.name}</td>
+                <td>${values.email}</td>
+                <td>${(values.admin)?'Sim':'Não'}</td>
+                <td>${Utils.dateFormat(values.register)}</td>
+                <td>
+                    <button type="button" class="btn-edit btn btn-primary btn-xs btn-flat">Editar</button>
+                    <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
+                </td>
+            
+            `;
+            this.addEventsTR(tr);
+            this.updateCount();
+
+        });
+    }
+
     onClosed() {
         document.querySelector("#box-user-create").style.display = "block";
         document.querySelector("#box-user-update").style.display = "none";
         this.formEl.reset();
+        this.formUpdate.reset();
     }
 
     getPhoto(){
@@ -63,12 +97,13 @@ class UserContrller{
         });
     }
 
-    getValue() {
+    getValue(formId) {
         
+        let formEl = formId;
         let user = {};
         let isValid = true;
 
-        [...this.formEl.elements].forEach(function(field, index){
+        [...formEl.elements].forEach(function(field, index){
             if(['name', 'email', 'password'].indexOf(field.name) > -1 && !field.value) {
                 field.parentElement.classList.add('has-error');
                 isValid = false;
@@ -115,10 +150,19 @@ class UserContrller{
            
         `;
 
+        this.addEventsTR(tr);
+        
+        this.tableEl.appendChild(tr);
+        this.updateCount();
+    }
+
+    addEventsTR(tr) {
         tr.querySelector(".btn-edit").addEventListener("click", e=>{
 
             let json = JSON.parse(tr.dataset.user);
             let form = document.querySelector("#form-user-update");
+
+            form.dataset.trIndex = tr.sectionRowIndex;
 
             for(let name in json) {
                 let field = form.querySelector("[name="+name.replace("_", "")+"]");
@@ -144,9 +188,6 @@ class UserContrller{
             document.querySelector("#box-user-update").style.display = "block";
 
         });
-        
-        this.tableEl.appendChild(tr);
-        this.updateCount();
     }
 
     updateCount() {
