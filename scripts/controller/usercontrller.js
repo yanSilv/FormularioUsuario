@@ -171,6 +171,9 @@ class UserContrller{
     addEventsTR(tr) {
         tr.querySelector(".btn-delete").addEventListener("click", e=>{
             if(confirm("Deseja realmente excluir?")) {
+                let user = new User();
+                user.loadFromJSON(JSON.parse(tr.dataset.user));
+                user.remove();
                 tr.remove();
                 this.updateCount();
             }
@@ -227,8 +230,7 @@ class UserContrller{
     }
 
     selectAll() {
-        let user = new User();
-        let users = user.getSessionStorage();
+        let users = User.getSessionStorage();
         users.forEach(dataUser=>{
             let user = new User();
             user.loadFromJSON(dataUser);
