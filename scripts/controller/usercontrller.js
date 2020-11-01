@@ -4,6 +4,7 @@ class UserContrller{
         this.formUpdate = document.getElementById(formIdUpdate);
         this.tableEl = document.getElementById(tableId);
         this.onEdit();
+        this.selectAll();
     }
 
     onSubmit(){
@@ -19,7 +20,8 @@ class UserContrller{
 
             this.getPhoto(this.formEl).then(
                 (content)=>{
-                    values.photo = content;     
+                    values.photo = content;
+                    this.insert(values);     
                     this.addLine(values);
                     this.formEl.reset();
                 },
@@ -228,5 +230,30 @@ class UserContrller{
 
         document.querySelector("#number-users").innerHTML = numberUser;
         document.querySelector("#number-users-admin").innerHTML = numberAdmin;
+    }
+
+    getSessionStorage() {
+        let users = [];
+        if (sessionStorage.getItem("users")) {
+            users = JSON.parse(sessionStorage.getItem("users"));
+        }
+
+        return users;
+    }
+
+    selectAll() {
+        let users = this.getSessionStorage();
+        users.forEach(dataUser=>{
+            let user = new User();
+            user.loadFromJSON(dataUser);
+            this.addLine(user);
+        });
+    }
+
+
+    insert(dataUser) {
+        let users = this.getSessionStorage();
+        users.push(dataUser);
+        sessionStorage.setItem("users", JSON.stringify(users));
     }
 }
